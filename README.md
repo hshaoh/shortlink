@@ -5,8 +5,6 @@
 ![](https://img.shields.io/github/contributors/opengoofy/hippo4j)
 [![percentage of issues still open](http://isitmaintained.com/badge/open/opengoofy/hippo4j.svg)](http://isitmaintained.com/project/opengoofy/hippo4j "percentage of issues still open")
 
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/opengoofy/hippo4j/develop?color=orange)
-
 ## 简介
 
 ![](https://oss.open8gu.com/image-20231115133642504.png)
