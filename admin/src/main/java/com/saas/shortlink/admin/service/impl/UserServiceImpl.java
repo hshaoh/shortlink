@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.saas.shortlink.admin.common.constant.RedisCacheConstant;
 import com.saas.shortlink.admin.common.convention.exception.ClientException;
 import com.saas.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.saas.shortlink.admin.dao.entity.UserDO;
@@ -12,7 +13,10 @@ import com.saas.shortlink.admin.dto.UserRegisterDTO;
 import com.saas.shortlink.admin.vo.UserVO;
 import com.saas.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.redisson.api.RBloomFilter;
 
@@ -24,6 +28,7 @@ import org.redisson.api.RBloomFilter;
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
+    private final RedissonClient redissonClient;
 
     @Override
     public UserVO getUserByUsername(String username) {
@@ -46,17 +51,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void register(UserRegisterDTO userRegisterDTO) {
-        // 判断用户名是否已经存在，已存在抛出错误
+        // 判断用户名是否已经存在，已存在抛出异常
         if (!availableUsername(userRegisterDTO.getUsername())){
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
-        // 如果不存在，将用户数据加入数据库中
-        int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterDTO, UserDO.class));
-        if (inserted < 1) {
-            throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
+
+        // 获得用户名的分布式锁
+        RLock lock = redissonClient.getLock(RedisCacheConstant.LOCK_USER_REGISTER_KEY + userRegisterDTO.getUsername());
+
+        if (!lock.tryLock()) {
+            throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
-        // 将用户名加入redis中
-        userRegisterCachePenetrationBloomFilter.add(userRegisterDTO.getUsername());
+
+        try {
+            // 如果不存在，将用户数据加入数据库中
+            int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterDTO, UserDO.class));
+            if (inserted < 1) {
+                throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
+            }
+            // 将用户名加入redis中
+            userRegisterCachePenetrationBloomFilter.add(userRegisterDTO.getUsername());
+        } catch (DuplicateKeyException ex){
+            throw new ClientException(UserErrorCodeEnum.USER_EXIST);
+        } finally {
+            lock.unlock();
+        }
+
     }
 
 
