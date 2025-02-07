@@ -1,4 +1,4 @@
-package com.saas.shortlink.admin.common.web;
+package com.saas.shortlink.admin.handler;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;

@@ -1,16 +1,14 @@
-package com.saas.shortlink.admin.dto.resp;
+package com.saas.shortlink.admin.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import com.saas.shortlink.admin.common.serialize.PhoneDesensitizationSerializer;
 
-import java.util.Date;
-
 /**
  * 用户返回参数实体
  */
 @Data
-public class UserRespDTO {
+public class UserVO {
 
     /**
      * id
