@@ -1,7 +1,7 @@
 package com.saas.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.saas.shortlink.admin.dao.entity.UserDO;
+import com.saas.shortlink.admin.dao.entity.User;
 import com.saas.shortlink.admin.dto.UserLoginDTO;
 import com.saas.shortlink.admin.dto.UserRegisterDTO;
 import com.saas.shortlink.admin.dto.UserUpdateDTO;
@@ -11,7 +11,7 @@ import com.saas.shortlink.admin.vo.UserVO;
 /**
  * 用户接口层
  */
-public interface UserService extends IService<UserDO> {
+public interface UserService extends IService<User> {
 
     /**
      * 根据用户名查询用户信息

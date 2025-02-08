@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 
 /**
@@ -14,7 +13,7 @@ import java.util.Date;
  */
 @Data
 @TableName("t_user")
-public class UserDO{
+public class User {
     /**
      * id
      */

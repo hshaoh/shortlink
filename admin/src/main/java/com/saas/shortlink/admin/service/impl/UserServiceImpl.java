@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.saas.shortlink.admin.common.constant.RedisCacheConstant;
 import com.saas.shortlink.admin.common.convention.exception.ClientException;
 import com.saas.shortlink.admin.common.enums.UserErrorCodeEnum;
-import com.saas.shortlink.admin.dao.entity.UserDO;
+import com.saas.shortlink.admin.dao.entity.User;
 import com.saas.shortlink.admin.dao.mapper.UserMapper;
 import com.saas.shortlink.admin.dto.UserLoginDTO;
 import com.saas.shortlink.admin.dto.UserRegisterDTO;
@@ -38,7 +38,7 @@ import static com.saas.shortlink.admin.common.constant.RedisCacheConstant.USER_L
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;
@@ -47,9 +47,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public UserVO getUserByUsername(String username) {
         // Wrappers 是 MyBatis-Plus 提供的一个工具类，用于创建各种类型的 Wrapper
-        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-                .eq(UserDO::getUsername, username);
-        UserDO userDO = baseMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<User> queryWrapper = Wrappers.lambdaQuery(User.class)
+                .eq(User::getUsername, username);
+        User userDO = baseMapper.selectOne(queryWrapper);
         if (userDO == null) {
             throw new ClientException(UserErrorCodeEnum.USER_NULL);
         }
@@ -80,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         try {
             // 如果不存在，将用户数据加入数据库中
-            int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterDTO, UserDO.class));
+            int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterDTO, User.class));
             if (inserted < 1) {
                 throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
             }
@@ -97,19 +97,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public void update(UserUpdateDTO userUpdateDTO) {
         // TODO 验证当前用户是否为登录用户
-        LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
-                .eq(UserDO::getUsername, userUpdateDTO.getUsername());
-        UserDO userDO = BeanUtil.toBean(userUpdateDTO, UserDO.class);
+        LambdaUpdateWrapper<User> updateWrapper = Wrappers.lambdaUpdate(User.class)
+                .eq(User::getUsername, userUpdateDTO.getUsername());
+        User userDO = BeanUtil.toBean(userUpdateDTO, User.class);
         baseMapper.update(userDO, updateWrapper);
     }
 
     @Override
     public UserLoginVO login(UserLoginDTO userLoginDTO) {
-        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-                .eq(UserDO::getUsername, userLoginDTO.getUsername())
-                .eq(UserDO::getPassword, userLoginDTO.getPassword())
-                .eq(UserDO::getDelFlag, 0);
-        UserDO userDO = baseMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<User> queryWrapper = Wrappers.lambdaQuery(User.class)
+                .eq(User::getUsername, userLoginDTO.getUsername())
+                .eq(User::getPassword, userLoginDTO.getPassword())
+                .eq(User::getDelFlag, 0);
+        User userDO = baseMapper.selectOne(queryWrapper);
         // 用户名不存在
         if (userDO == null) {
             throw new ClientException(UserErrorCodeEnum.USER_NULL);
