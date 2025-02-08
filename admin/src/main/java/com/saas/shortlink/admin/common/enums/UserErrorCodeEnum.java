@@ -7,13 +7,18 @@ import com.saas.shortlink.admin.common.convention.errorcode.IErrorCode;
  */
 public enum UserErrorCodeEnum implements IErrorCode {
 
-    USER_NULL("B000200", "用户记录不存在"),
+    USER_NULL("A000200", "用户记录不存在"),
 
-    USER_NAME_EXIST("B000201", "用户名已存在"),
+    USER_NAME_EXIST("A000201", "用户名已存在"),
 
-    USER_EXIST("B000202", "用户记录已存在"),
+    USER_EXIST("A000202", "用户记录已存在"),
 
-    USER_SAVE_ERROR("B000203", "用户记录新增失败");
+    USER_SAVE_ERROR("A000203", "用户记录新增失败"),
+
+    USER_LOGIN_ERROR("A000204", "用户登录错误"),
+
+    USER_TOKEN_NULL("A000205","用户Token不存在或用户未登录");
+
 
     private final String code;
 

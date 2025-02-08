@@ -2,7 +2,10 @@ package com.saas.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.saas.shortlink.admin.dao.entity.UserDO;
+import com.saas.shortlink.admin.dto.UserLoginDTO;
 import com.saas.shortlink.admin.dto.UserRegisterDTO;
+import com.saas.shortlink.admin.dto.UserUpdateDTO;
+import com.saas.shortlink.admin.vo.UserLoginVO;
 import com.saas.shortlink.admin.vo.UserVO;
 
 /**
@@ -30,4 +33,33 @@ public interface UserService extends IService<UserDO> {
      */
     void register(UserRegisterDTO userRegisterDTO);
 
+    /**
+     * 根据用户名修改用户信息
+     * @param userUpdateDTO 修改用户请求参数
+     */
+    void update(UserUpdateDTO userUpdateDTO);
+
+    /**
+     * 用户登录
+     * @param userLoginDTO 用户登录请求参数
+     * @return 用户登录返回参数 Token
+     */
+    UserLoginVO login(UserLoginDTO userLoginDTO);
+
+    /**
+     * 检查用户是否登录
+     *
+     * @param username 用户名
+     * @param token    用户登录 Token
+     * @return 用户是否登录标识
+     */
+    Boolean checkLogin(String username, String token);
+
+    /**
+     * 退出登录
+     *
+     * @param username 用户名
+     * @param token    用户登录 Token
+     */
+    void logout(String username, String token);
 }
