@@ -15,6 +15,11 @@ public class HashUtil {
 
     private static final int SIZE = CHARS.length;
 
+    /**
+     * 将十进制数字转换为 Base62 编码的字符串
+     * @param num 十进制数字
+     * @return Base62编码的字符串
+     */
     private static String convertDecToBase62(long num) {
         StringBuilder sb = new StringBuilder();
         while (num > 0) {
@@ -26,8 +31,8 @@ public class HashUtil {
     }
 
     public static String hashToBase62(String str) {
-        int i = MurmurHash.hash32(str);
-        long num = i < 0 ? Integer.MAX_VALUE - (long) i : i;
+        int i = MurmurHash.hash32(str); // MurmurHash生成得到的是一个long类型的10进制数
+        long num = i < 0 ? Integer.MAX_VALUE - (long) i : i; // 防止取负值
         return convertDecToBase62(num);
     }
 }
