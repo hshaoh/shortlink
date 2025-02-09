@@ -27,7 +27,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/api/short-link/admin/**") // 添加拦截路径
-                .excludePathPatterns("/api/short-link/admin/v1/user/login"); // 排除拦截路径
+                .excludePathPatterns("/api/short-link/admin/v1/user/login") // 排除拦截路径
+                .excludePathPatterns("/api/short-link/admin/v1/user/register")
+                .excludePathPatterns("/api/short-link/admin/v1/user/has-username");
     }
 
 
