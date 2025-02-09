@@ -33,7 +33,7 @@ public class UserController {
      * @param username
      * @return
      */
-    @GetMapping("/api/short-link/admin/v1/user/available-username")
+    @GetMapping("/api/short-link/admin/v1/user/has-username")
     public Result<Boolean> availableUsername(@RequestParam("username") String username) {
         return Results.success(userService.availableUsername(username));
     }
