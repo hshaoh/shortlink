@@ -29,6 +29,8 @@
         <hutool-all.version>5.8.27</hutool-all.version>
         <redisson.version>3.27.2</redisson.version>
         <guava.version>30.0-jre</guava.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <jaxb-runtime.version>2.3.1</jaxb-runtime.version>
     </properties>
 
 <!--  dependencies会下载依赖，子类也会继承  -->
@@ -77,11 +79,11 @@
                 <version>${shardingsphere.version}</version>
             </dependency>
 
-<!--            <dependency>-->
-<!--                <groupId>io.jsonwebtoken</groupId>-->
-<!--                <artifactId>jjwt</artifactId>-->
-<!--                <version>${jjwt.version}</version>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
@@ -112,6 +114,21 @@
 <!--                <artifactId>guava</artifactId>-->
 <!--                <version>${guava.version}</version>-->
 <!--            </dependency>-->
+            <!-- poi -->
+            <!-- JAXB API -->
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
+            </dependency>
+
+            <!-- JAXB Runtime -->
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>2.3.1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
