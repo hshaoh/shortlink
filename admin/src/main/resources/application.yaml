@@ -2,6 +2,9 @@ server:
   port: 8002
 
 spring:
+  application:
+    name: short-link-admin
+
   datasource:
     # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
@@ -14,6 +17,13 @@ spring:
       port: 6379
       password: 123456
 
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+
+
 shortlink:
   group:
     # 设置最大分组数
@@ -25,4 +35,4 @@ shortlink:
     # 设置jwt过期时间
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
-    admin-token-name: Authorization
+    admin-token-name: Token
