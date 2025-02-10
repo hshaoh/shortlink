@@ -1,10 +1,12 @@
 package com.saas.shortlink.admin.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.saas.shortlink.admin.common.convention.result.Result;
 import com.saas.shortlink.admin.common.convention.result.Results;
 import com.saas.shortlink.admin.dto.UserLoginDTO;
 import com.saas.shortlink.admin.dto.UserRegisterDTO;
 import com.saas.shortlink.admin.dto.UserUpdateDTO;
+import com.saas.shortlink.admin.vo.UserActualVO;
 import com.saas.shortlink.admin.vo.UserLoginVO;
 import com.saas.shortlink.admin.vo.UserVO;
 import com.saas.shortlink.admin.service.UserService;
@@ -29,6 +31,14 @@ public class UserController {
     }
 
     /**
+     * 根据用户名查询无脱敏用户信息
+     */
+    @GetMapping("/api/short-link/admin/v1/actual/user/{username}")
+    public Result<UserActualVO> getActualUserByUsername(@PathVariable("username") String username) {
+        return Results.success(BeanUtil.toBean(userService.getUserByUsername(username), UserActualVO.class));
+    }
+
+    /**
      * 查询用户名是否存在
      * @param username
      * @return
@@ -41,7 +51,7 @@ public class UserController {
     /**
      * 注册用户
      */
-    @PostMapping("/api/short-link/admin/v1/user")
+    @PostMapping("/api/short-link/admin/v1/user/register")
     public Result<Void> register(@RequestBody UserRegisterDTO userRegisterDTO) {
         userService.register(userRegisterDTO);
         return Results.success();
