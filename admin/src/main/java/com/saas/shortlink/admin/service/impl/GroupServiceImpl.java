@@ -9,12 +9,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.saas.shortlink.admin.common.constant.RedisCacheConstant;
 import com.saas.shortlink.admin.common.context.UserContext;
 import com.saas.shortlink.admin.common.convention.exception.ClientException;
+import com.saas.shortlink.admin.common.convention.result.Result;
 import com.saas.shortlink.admin.common.properties.GroupProperties;
 import com.saas.shortlink.admin.dao.entity.Group;
 import com.saas.shortlink.admin.dao.entity.User;
 import com.saas.shortlink.admin.dao.mapper.GroupMapper;
 import com.saas.shortlink.admin.dto.GroupSortDTO;
 import com.saas.shortlink.admin.dto.GroupUpdateDTO;
+import com.saas.shortlink.admin.remote.ShortLinkActualRemoteService;
+import com.saas.shortlink.admin.remote.vo.ShortLinkGroupCountVO;
 import com.saas.shortlink.admin.service.GroupService;
 import com.saas.shortlink.admin.util.RandomGenerator;
 import com.saas.shortlink.admin.vo.GroupVO;
@@ -25,6 +28,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -35,6 +40,8 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
     private final RedissonClient redissonClient;
 
     private final GroupProperties groupProperties;
+
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     @Override
     public void saveGroup(String groupName) {
@@ -87,7 +94,24 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
                 .eq(Group::getUsername, UserContext.getUsername())
                 .orderByDesc(Group::getSortOrder, Group::getUpdateTime);
         List<Group> groupList = baseMapper.selectList(queryWrapper);
-        return BeanUtil.copyToList(groupList, GroupVO.class);
+
+        // 解析出gid集合
+        List<String> gids = groupList.stream().map(Group::getGid).toList();
+        // 远程调用project返回分组结果
+        Result<List<ShortLinkGroupCountVO>> listResult = shortLinkActualRemoteService.listGroupShortLinkCount(gids);
+        // 取出 Result 中的 Data 数据
+        List<ShortLinkGroupCountVO> shortLinkGroupCountVOList = listResult.getData();
+        // 构造Map<gid:countGroup>对应关系
+        Map<String, Integer> CountGroupMap = shortLinkGroupCountVOList.stream().collect(Collectors.toMap(ShortLinkGroupCountVO::getGid, // key
+                ShortLinkGroupCountVO::getShortLinkCount));//value
+
+        return groupList.stream().map(group -> GroupVO.builder()
+                        .name(group.getName())
+                        .gid(group.getGid())
+                        .sortOrder(group.getSortOrder())
+                        .shortLinkCount(CountGroupMap.get(group.getGid()))
+                        .build()).toList();
+//        return BeanUtil.copyToList(groupList, GroupVO.class);
     }
 
     @Override

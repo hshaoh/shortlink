@@ -3,6 +3,7 @@ package com.saas.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -15,6 +16,7 @@ import com.saas.shortlink.project.dto.ShortLinkPageDTO;
 import com.saas.shortlink.project.service.ShortLinkService;
 import com.saas.shortlink.project.util.HashUtil;
 import com.saas.shortlink.project.vo.ShortLinkCreateVO;
+import com.saas.shortlink.project.vo.ShortLinkGroupCountVO;
 import com.saas.shortlink.project.vo.ShortLinkPageVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,8 @@ import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -46,6 +50,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         ShortLink shortLink = BeanUtil.toBean(shortLinkCreateDTO, ShortLink.class);
         shortLink.setFullShortUrl(fullShortUrl);
         shortLink.setShortUri(shortLinkSuffix);
+        shortLink.setEnableStatus(0);
 
         // 处理布隆过滤器出现误判的情况，生成的短链接数据库中已经存在
         try {
@@ -80,6 +85,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         // 使用 convert 方法将 ShortLink 转换为 ShortLinkPageVO
         return resultPage.convert(each -> BeanUtil.toBean(each, ShortLinkPageVO.class));
 
+    }
+
+    @Override
+    public List<ShortLinkGroupCountVO> listGroupShortLinkCount(List<String> requestParam) {
+        QueryWrapper<ShortLink> queryWrapper = Wrappers.query(new ShortLink())
+                .select("gid as gid, count(*) as shortLinkCount")
+                .in("gid", requestParam)
+                .eq("enable_status", 0)
+                .eq("del_flag", 0)
+                .groupBy("gid");
+        List<Map<String, Object>> shortLinkList = baseMapper.selectMaps(queryWrapper);
+        return BeanUtil.copyToList(shortLinkList, ShortLinkGroupCountVO.class);
     }
 
     private String generateSuffix(ShortLinkCreateDTO shortLinkCreateDTO) {
