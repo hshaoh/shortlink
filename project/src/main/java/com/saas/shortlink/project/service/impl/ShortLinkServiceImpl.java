@@ -2,15 +2,20 @@ package com.saas.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.saas.shortlink.project.common.convention.exception.ServiceException;
 import com.saas.shortlink.project.dao.entity.ShortLink;
 import com.saas.shortlink.project.dao.mapper.ShortLinkMapper;
 import com.saas.shortlink.project.dto.ShortLinkCreateDTO;
+import com.saas.shortlink.project.dto.ShortLinkPageDTO;
 import com.saas.shortlink.project.service.ShortLinkService;
 import com.saas.shortlink.project.util.HashUtil;
 import com.saas.shortlink.project.vo.ShortLinkCreateVO;
+import com.saas.shortlink.project.vo.ShortLinkPageVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
@@ -59,6 +64,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .originUrl(shortLinkCreateDTO.getOriginUrl())
                 .gid(shortLinkCreateDTO.getGid())
                 .build();
+
+    }
+
+    @Override
+    public IPage<ShortLinkPageVO> pageShortLink(ShortLinkPageDTO shortLinkPageDTO) {
+        // 构建查询条件
+        LambdaQueryWrapper<ShortLink> queryWrapper = Wrappers.lambdaQuery(ShortLink.class)
+                .eq(ShortLink::getGid, shortLinkPageDTO.getGid())
+                .eq(ShortLink::getEnableStatus, 0)
+                .eq(ShortLink::getDelFlag, 0);
+        // 执行分页查询
+        IPage<ShortLink> resultPage = baseMapper.selectPage(shortLinkPageDTO, queryWrapper);
+
+        // 使用 convert 方法将 ShortLink 转换为 ShortLinkPageVO
+        return resultPage.convert(each -> BeanUtil.toBean(each, ShortLinkPageVO.class));
 
     }
 
