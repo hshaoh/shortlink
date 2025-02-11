@@ -9,8 +9,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
+@EnableTransactionManagement //开启注解方式的事务管理
 @EnableDiscoveryClient
 @EnableFeignClients("com.saas.shortlink.admin.remote")
 @MapperScan("com.saas.shortlink.admin.dao.mapper")
