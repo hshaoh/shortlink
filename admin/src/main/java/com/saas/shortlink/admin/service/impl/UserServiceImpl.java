@@ -18,6 +18,7 @@ import com.saas.shortlink.admin.dao.mapper.UserMapper;
 import com.saas.shortlink.admin.dto.UserLoginDTO;
 import com.saas.shortlink.admin.dto.UserRegisterDTO;
 import com.saas.shortlink.admin.dto.UserUpdateDTO;
+import com.saas.shortlink.admin.service.GroupService;
 import com.saas.shortlink.admin.util.JwtUtil;
 import com.saas.shortlink.admin.vo.UserLoginVO;
 import com.saas.shortlink.admin.vo.UserVO;
@@ -30,6 +31,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.redisson.api.RBloomFilter;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtProperties jwtProperties;
+    private final GroupService groupService;
 
     @Override
     public UserVO getUserByUsername(String username) {
@@ -69,6 +72,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return !userRegisterCachePenetrationBloomFilter.contains(username);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void register(UserRegisterDTO userRegisterDTO) {
         // 判断用户名是否已经存在，已存在抛出异常
@@ -89,6 +93,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (inserted < 1) {
                 throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
             }
+            // 为用户创建默认分组
+            groupService.saveGroup(userRegisterDTO.getUsername(), "默认分组");
             // 将用户名加入redis中
             userRegisterCachePenetrationBloomFilter.add(userRegisterDTO.getUsername());
         } catch (DuplicateKeyException ex){
