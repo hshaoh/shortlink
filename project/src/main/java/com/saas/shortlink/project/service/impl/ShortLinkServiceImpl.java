@@ -41,6 +41,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -272,12 +273,24 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLink::getDelFlag, 0)
                     .eq(ShortLink::getEnableStatus, 0);
             ShortLink shortLink = baseMapper.selectOne(queryWrapper);
-            if (shortLink != null) {
-                // 将原始链接加入到缓存中
-                stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, fullShortUrl), shortLink.getOriginUrl());
-                // 重定向到原始链接
-                response.sendRedirect(shortLink.getOriginUrl());
+
+            // 数据库中查不到原始链接 或者 短链接的有效期到了（不是永久有效类型）
+            if (shortLink == null || (shortLink.getValidDate() != null && shortLink.getValidDate().isBefore(LocalDateTime.now()))) {
+                stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                return;
             }
+
+            // 数据库中查询到原始链接，将原始链接加入到缓存中
+            stringRedisTemplate.opsForValue().set(
+                    String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, fullShortUrl),
+                    shortLink.getOriginUrl(),
+                    LinkUtil.getLinkCacheValidTime(shortLink.getValidDate()), TimeUnit.MILLISECONDS
+            );
+
+            // 重定向到原始链接
+            response.sendRedirect(shortLink.getOriginUrl());
+
+
         } finally {
             lock.unlock();
         }
