@@ -4,24 +4,33 @@ server:
 spring:
   application:
     name: short-link-project
-
   datasource:
     # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     # ShardingSphere 配置文件路径
     url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
-
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       password: 123456
-
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .html
   cloud:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
 
+short-link:
+  # 域名
+  domain:
+    default: shortlink.natapp1.cc
+  # 高德地图API的KEY
+  stats:
+    locale:
+      amap-key: d122276d81ae9c8092fe51044fc760f9
 
 # 开启mp的日志（输出到控制台）
 #mybatis-plus:
