@@ -1,8 +1,11 @@
 package com.saas.shortlink.admin.vo;
 
+import lombok.Data;
+
 /**
  * 用户返回参数实体(无脱敏)
  */
+@Data
 public class UserActualVO {
 
     /**
